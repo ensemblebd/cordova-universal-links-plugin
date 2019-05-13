@@ -7,9 +7,9 @@ Which is:
 */
 
 var path = require('path');
+var fs = require('fs');
 var compare = require('node-version-compare');
 var ConfigXmlHelper = require('../configXmlHelper.js');
-var iosProjectEntitlements = require('./projectEntitlements.js');
 var IOS_DEPLOYMENT_TARGET = '8.0';
 var COMMENT_KEY = /_comment$/;
 var context;
@@ -26,7 +26,7 @@ module.exports = {
  * @param {Object} cordovaContext - cordova context object
  */
 function enableAssociativeDomainsCapability(cordovaContext) {
-  if (iosProjectEntitlements.useEnvironmentPlists()) {
+  if (fs.existsSync(pathToEntitlementsFile('Release'))) {
     return;
   }
 
@@ -193,12 +193,16 @@ function projectRoot() {
   return context.opts.projectRoot;
 }
 
-function pathToEntitlementsFile() {
+function pathToEntitlementsFile(env = null) {
   var configXmlHelper = new ConfigXmlHelper(context),
-    projectName = configXmlHelper.getProjectName(),
-    fileName = projectName + '.entitlements';
+    projectName = configXmlHelper.getProjectName();
 
-  return path.join(projectName, 'Resources', fileName);
+  if (env == null) {
+    var fileName = projectName + '.entitlements';
+    return path.join(projectName, 'Resources', fileName);
+  } else {
+    return path.join(projectName, 'Entitlements-' + env + '.plist');
+  }
 }
 
 // endregion
