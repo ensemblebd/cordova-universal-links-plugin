@@ -29,7 +29,8 @@ function enableAssociativeDomainsCapability(cordovaContext) {
   context = cordovaContext;
 
   // if we use environment-based entitlement files, we do not need to update the project file
-  if (fs.existsSync(pathToEntitlementsFile('Release'))) {
+  var envEntitlementsPath = path.join(projectRoot(), 'platforms', 'ios', projectName(), 'Entitlements-Release.plist');
+  if (fs.existsSync(envEntitlementsPath)) {
     return;
   }
 
@@ -194,16 +195,14 @@ function projectRoot() {
   return context.opts.projectRoot;
 }
 
-function pathToEntitlementsFile(env = null) {
-  var configXmlHelper = new ConfigXmlHelper(context),
-    projectName = configXmlHelper.getProjectName();
+function projectName() {
+  var configXmlHelper = new ConfigXmlHelper(context);
+  return configXmlHelper.getProjectName();
+}
 
-  if (env == null) {
-    var fileName = projectName + '.entitlements';
-    return path.join(projectName, 'Resources', fileName);
-  } else {
-    return path.join(projectName, 'Entitlements-' + env + '.plist');
-  }
+function pathToEntitlementsFile() {
+  var fileName = projectName() + '.entitlements';
+  return path.join(projectName(), 'Resources', fileName);
 }
 
 // endregion
