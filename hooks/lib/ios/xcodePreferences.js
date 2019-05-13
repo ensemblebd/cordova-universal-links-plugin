@@ -26,11 +26,12 @@ module.exports = {
  * @param {Object} cordovaContext - cordova context object
  */
 function enableAssociativeDomainsCapability(cordovaContext) {
+  context = cordovaContext;
+
+  // if we use environment-based entitlement files, we do not need to update the project file
   if (fs.existsSync(pathToEntitlementsFile('Release'))) {
     return;
   }
-
-  context = cordovaContext;
 
   var projectFile = loadProjectFile();
 
