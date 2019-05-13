@@ -9,13 +9,14 @@ Which is:
 var path = require('path');
 var compare = require('node-version-compare');
 var ConfigXmlHelper = require('../configXmlHelper.js');
+var iosProjectEntitlements = require('./projectEntitlements.js');
 var IOS_DEPLOYMENT_TARGET = '8.0';
 var COMMENT_KEY = /_comment$/;
 var context;
 
 module.exports = {
   enableAssociativeDomainsCapability: enableAssociativeDomainsCapability
-}
+};
 
 // region Public API
 
@@ -25,6 +26,10 @@ module.exports = {
  * @param {Object} cordovaContext - cordova context object
  */
 function enableAssociativeDomainsCapability(cordovaContext) {
+  if (iosProjectEntitlements.useEnvironmentPlists()) {
+    return;
+  }
+
   context = cordovaContext;
 
   var projectFile = loadProjectFile();
@@ -145,12 +150,12 @@ function loadProjectFile() {
     try {
       platform_ios = context.requireCordovaModule('cordova-lib/src/plugman/platforms/ios');
       projectFile = platform_ios.parseProjectFile(iosPlatformPath());
-    } catch(e) {
+    } catch (e) {
       // try cordova 7.0 structure
       var iosPlatformApi = require(path.join(iosPlatformPath(), '/cordova/Api'));
       var projectFileApi = require(path.join(iosPlatformPath(), '/cordova/lib/projectFile.js'));
-      var locations = (new iosPlatformApi()).locations;
-      projectFile = projectFileApi.parse(locations);      
+      var locations = new iosPlatformApi().locations;
+      projectFile = projectFileApi.parse(locations);
     }
   }
 

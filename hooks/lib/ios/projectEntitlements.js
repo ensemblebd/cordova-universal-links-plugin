@@ -32,10 +32,19 @@ module.exports = {
 function generateEntitlements(cordovaContext, pluginPreferences) {
   context = cordovaContext;
 
-  var currentEntitlements = getEntitlementsFileContent();
-  var newEntitlements = injectPreferences(currentEntitlements, pluginPreferences);
+  if (useEnvironmentPlists()) {
+    ['Release', 'Debug'].forEach(function(env) {
+      var currentEntitlements = getEntitlementsFileContent(env);
+      var newEntitlements = injectPreferences(currentEntitlements, pluginPreferences);
 
-  saveContentToEntitlementsFile(newEntitlements);
+      saveContentToEntitlementsFile(newEntitlements, env);
+    });
+  } else {
+    var currentEntitlements = getEntitlementsFileContent();
+    var newEntitlements = injectPreferences(currentEntitlements, pluginPreferences);
+
+    saveContentToEntitlementsFile(newEntitlements);
+  }
 }
 
 // endregion
@@ -47,9 +56,9 @@ function generateEntitlements(cordovaContext, pluginPreferences) {
  *
  * @param {Object} content - data to save; JSON object that will be transformed into xml
  */
-function saveContentToEntitlementsFile(content) {
+function saveContentToEntitlementsFile(content, env) {
   var plistContent = plist.build(content);
-  var filePath = pathToEntitlementsFile();
+  var filePath = pathToEntitlementsFile(env);
 
   // ensure that file exists
   mkpath.sync(path.dirname(filePath));
@@ -63,8 +72,8 @@ function saveContentToEntitlementsFile(content) {
  *
  * @return {String} entitlements file content
  */
-function getEntitlementsFileContent() {
-  var pathToFile = pathToEntitlementsFile();
+function getEntitlementsFileContent(env = null) {
+  var pathToFile = pathToEntitlementsFile(env);
   var content;
 
   try {
@@ -140,12 +149,29 @@ function domainsListEntryForHost(host) {
  *
  * @return {String} absolute path to entitlements file
  */
-function pathToEntitlementsFile() {
-  if (entitlementsFilePath === undefined) {
-    entitlementsFilePath = path.join(getProjectRoot(), 'platforms', 'ios', getProjectName(), 'Resources', getProjectName() + '.entitlements');
+function pathToEntitlementsFile(env = null) {
+  if (env == null) {
+    return path.join(
+      getProjectRoot(),
+      'platforms',
+      'ios',
+      getProjectName(),
+      'Resources',
+      getProjectName() + '.entitlements'
+    );
+  } else {
+    return path.join(getProjectRoot(), 'platforms', 'ios', getProjectName(), 'Entitlements-' + env + '.plist');
   }
+}
 
-  return entitlementsFilePath;
+/**
+ * Whether to use environment-based entitlements file.
+ *
+ * @return {String} absolute path to entitlements file
+ */
+function useEnvironmentPlists() {
+  var pathToFile = pathToEntitlementsFile('Release');
+  return fs.existsSync(pathToFile);
 }
 
 /**
