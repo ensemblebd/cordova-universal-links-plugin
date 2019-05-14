@@ -162,8 +162,7 @@ function constructWebCredentialsList(xmlPreferences) {
   }
 
   xmlWebCredentialsList.forEach(function(xmlElement) {
-    var credential = { host: credential['host'] };
-    webCredentialsList.push(credential);
+    webCredentialsList.push({ host: xmlElement['host'] });
   });
 
   return webCredentialsList;
