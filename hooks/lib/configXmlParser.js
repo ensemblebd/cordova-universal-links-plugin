@@ -162,7 +162,8 @@ function constructWebCredentialsList(xmlPreferences) {
   }
 
   xmlWebCredentialsList.forEach(function(xmlElement) {
-    webCredentialsList.push({ host: xmlElement['host'] });
+    var properties = xmlElement['$'];
+    webCredentialsList.push(properties);
   });
 
   return webCredentialsList;
