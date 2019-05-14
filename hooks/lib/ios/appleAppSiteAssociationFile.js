@@ -73,7 +73,7 @@ function createNewAssociationFiles(pluginPreferences) {
 
   pluginPreferences.webcredentials.forEach(function(webcredential) {
     var content = generateFileContentForHost(webcredential.host, teamId, true);
-    saveContentToFile(host.name, content);
+    saveContentToFile(webcredential.host, content);
   });
 }
 
