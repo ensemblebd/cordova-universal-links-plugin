@@ -21,7 +21,7 @@ function readPreferences(cordovaContext) {
   // read data from projects root config.xml file
   var configXml = new ConfigXmlHelper(cordovaContext).read();
   if (configXml == null) {
-    console.warn('config.xml not found! Please, check that it exist\'s in your project\'s root directory.');
+    console.warn("config.xml not found! Please, check that it exists in your project's root directory.");
     return null;
   }
 
@@ -37,12 +37,16 @@ function readPreferences(cordovaContext) {
   // read hosts
   var hosts = constructHostsList(xmlPreferences);
 
+  // read web credentials
+  var webcredentials = constructWebCredentialsList(xmlPreferences);
+
   // read ios team ID
   var iosTeamId = getTeamIdPreference(xmlPreferences);
 
   return {
-    'hosts': hosts,
-    'iosTeamId': iosTeamId
+    hosts: hosts,
+    webcredentials: webcredentials,
+    iosTeamId: iosTeamId
   };
 }
 
@@ -91,10 +95,10 @@ function constructHostsList(xmlPreferences) {
  */
 function constructHostEntry(xmlElement) {
   var host = {
-      scheme: DEFAULT_SCHEME,
-      name: '',
-      paths: []
-    };
+    scheme: DEFAULT_SCHEME,
+    name: '',
+    paths: []
+  };
   var hostProperties = xmlElement['$'];
 
   if (hostProperties == null || hostProperties.length == 0) {
@@ -140,6 +144,29 @@ function constructPaths(xmlElement) {
   });
 
   return paths;
+}
+
+/**
+ * Construct list of web credentials objects, defined in xml file.
+ *
+ * @param {Object} xmlPreferences - plugin preferences from config.xml as JSON object
+ * @return {Array} array of JSON objects, where each entry defines web credentials data from config.xml.
+ */
+function constructWebCredentialsList(xmlPreferences) {
+  var webCredentialsList = [];
+
+  // look for defined hosts
+  var xmlWebCredentialsList = xmlPreferences['webcredentials'];
+  if (xmlWebCredentialsList == null || xmlWebCredentialsList.length == 0) {
+    return [];
+  }
+
+  xmlWebCredentialsList.forEach(function(xmlElement) {
+    var credential = { host: credential['host'] };
+    webCredentialsList.push(credential);
+  });
+
+  return webCredentialsList;
 }
 
 // endregion
