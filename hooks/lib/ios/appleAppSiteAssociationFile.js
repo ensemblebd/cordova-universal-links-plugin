@@ -16,7 +16,6 @@ Additional documentation regarding apple-app-site-association file can be found 
 - https://developer.apple.com/library/ios/documentation/Security/Reference/SharedWebCredentialsRef/index.html#//apple_ref/doc/uid/TP40014989
 */
 
-
 var path = require('path');
 var mkpath = require('mkpath');
 var fs = require('fs');
@@ -71,6 +70,11 @@ function createNewAssociationFiles(pluginPreferences) {
     var content = generateFileContentForHost(host, teamId);
     saveContentToFile(host.name, content);
   });
+
+  pluginPreferences.webcredentials.forEach(function(webcredential) {
+    var content = generateFileContentForHost(webcredential.host, teamId, true);
+    saveContentToFile(host.name, content);
+  });
 }
 
 /**
@@ -79,25 +83,36 @@ function createNewAssociationFiles(pluginPreferences) {
  * @param {Object} host - host information
  * @return {Object} content of the file as JSON object
  */
-function generateFileContentForHost(host, teamId) {
+function generateFileContentForHost(host, teamId, webcredentials = false) {
   var appID = teamId + '.' + getBundleId();
-  var paths = host.paths.slice();
 
-  // if paths are '*' - we should add '/' to it to support root domains.
-  // https://github.com/nordnet/cordova-universal-links-plugin/issues/46
-  if (paths.length == 1 && paths[0] === '*') {
-    paths.push('/');
-  }
+  if (webcredentials) {
+    return {
+      webcredentials: {
+        apps: [appID]
+      }
+    };
+  } else {
+    var paths = host.paths.slice();
 
-  return {
-    "applinks": {
-      "apps": [],
-      "details": [{
-        "appID": appID,
-        "paths": paths
-      }]
+    // if paths are '*' - we should add '/' to it to support root domains.
+    // https://github.com/nordnet/cordova-universal-links-plugin/issues/46
+    if (paths.length == 1 && paths[0] === '*') {
+      paths.push('/');
     }
-  };
+
+    return {
+      applinks: {
+        apps: [],
+        details: [
+          {
+            appID: appID,
+            paths: paths
+          }
+        ]
+      }
+    };
+  }
 }
 
 /**

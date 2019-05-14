@@ -119,9 +119,17 @@ function injectPreferences(currentEntitlements, pluginPreferences) {
 function generateAssociatedDomainsContent(pluginPreferences) {
   var domainsList = [];
 
-  // generate list of host links
+  // generate list of app links
   pluginPreferences.hosts.forEach(function(host) {
-    var link = domainsListEntryForHost(host);
+    var link = appLinkListEntryForHost(host);
+    if (domainsList.indexOf(link) == -1) {
+      domainsList.push(link);
+    }
+  });
+
+  // add list of web credentials
+  pluginPreferences.webcredentials.forEach(function(webcredential) {
+    var link = webCredentialsListEntryForHost(webcredential.host);
     if (domainsList.indexOf(link) == -1) {
       domainsList.push(link);
     }
@@ -131,13 +139,23 @@ function generateAssociatedDomainsContent(pluginPreferences) {
 }
 
 /**
- * Generate domain record for the given host.
+ * Generate app link record for the given host.
  *
  * @param {Object} host - host entry
  * @return {String} record
  */
-function domainsListEntryForHost(host) {
+function appLinkListEntryForHost(host) {
   return 'applinks:' + host.name;
+}
+
+/**
+ * Generate web credentials record for the given host.
+ *
+ * @param {Object} host - host entry
+ * @return {String} record
+ */
+function webCredentialsListEntryForHost(host) {
+  return 'webcredentials:' + host;
 }
 
 // endregion
